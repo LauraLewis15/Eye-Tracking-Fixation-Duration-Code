@@ -138,9 +138,9 @@ for (i in 1:nrow(RealFixData)){
   ### Assign Actual Trial Numbers, AOI Labels, Trial Order, Population, Model Sex, Subject Sex, and Model ID's ####
 ########################################################################################################################
 
-## Fill these columns by Merging RealFixData dataframe with ALLInOutData_ALLDV's excel sheet (original, hand-extracted datasheet):
+## Fill these columns by Merging RealFixData dataframe with ALLInOutData_ALLDV's excel sheet (hand-made datasheet that indicates trial number/order, sex and identity of individuals in images, and location of images):
 
-############ Import Original Datasheet ############
+############ Import Hand-Made Datasheet ############
 ALLInOutData_ALLDV = read.csv("ALLInOutData_ALLDVs.csv")
 
 ########## Create smaller dataframe with only columns needed in final output ##########
@@ -208,10 +208,6 @@ df2$TrialName <- (paste(df2$Subject, df2$Cluster, df2$WithinCluster_Trial_Number
 #####Create New Variable that ties Fixation Index to Trial Name#####
 df2$TrialName_FixIndex <- (paste(RealFixData$FixationIndex, df2$TrialName, sep = ""))
 
-###### Sebastian ########
-### groupby all variables by df2, AND AOI
-#### then summarize[length of trial_fixindex]
-
 ##### Delete all duplicates of fixation indices, keeping only a single row for each fixation#########
 df2 <- df2[ !duplicated(df2$TrialName_FixIndex), ]
 
@@ -220,7 +216,7 @@ df2 <- df2[ !duplicated(df2$TrialName_FixIndex), ]
 agg_table <- aggregate(GazeEventDuration ~ TrialName + FixationSide, df2, sum, all.x = T)
 
 View(agg_table)
-######## Subset Dataframe by Left and Right Sums, Then Merge! #######
+######## Subset Dataframe by Left and Right Sums #######
 
 attach(agg_table)
 
@@ -229,7 +225,7 @@ RightTable <- as.data.frame(subset(agg_table,agg_table$FixationSide =="Right"))
 
 detach(agg_table)
 
-########## Merge Subsetted Dataframes ################
+########## Merge Subsetted Dataframes! ################
 
 SingleRow <- merge(LeftTable, RightTable, all = TRUE, by = c("TrialName"))
 
@@ -239,7 +235,7 @@ SingleRow[is.na(SingleRow)] <- 0
 
 View(SingleRow)
 
-#### Download Plyr Package if  Don't Already Have It #####
+#### Download Plyr Package if Don't Already Have It #####
 library(plyr)
 
 #### Change Final Column Names, Take Out Extra Columns #####
@@ -253,7 +249,7 @@ SingleRow <- within(SingleRow, rm(FixationSide.x, FixationSide.y))
 View(SingleRow)
 
 
-############## Merge SingleRow Simple Datasheet with Datasheet containing all relevant info ##########
+############## Merge SingleRow Simple Datasheet with Hand-Made Datasheet containing all relevant info ##########
 
 ################ Create Matching Trial Names in Original Datasheet and SingleRow Datasheet to be able to Merge ###########
 View(ALLInOutData_ALLDV)
